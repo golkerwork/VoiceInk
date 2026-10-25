@@ -68,6 +68,7 @@ private extension ViewType {
 
     static let primaryItems: [ViewType] = [
         .dashboard,
+        .meetings,
         .modes,
         .transcribeAudio,
         .history,
@@ -91,6 +92,7 @@ private extension ViewType {
     var icon: String {
         switch self {
         case .dashboard: return "gauge.medium"
+        case .meetings: return "person.2.wave.2.fill"
         case .transcribeAudio: return "waveform.path"
         case .history: return "doc.text.fill"
         case .models: return "cpu"
@@ -106,6 +108,8 @@ private extension ViewType {
         switch self {
         case .dashboard:
             return .init(background: AppTheme.Sidebar.dashboard)
+        case .meetings:
+            return .init(background: AppTheme.Sidebar.meetings)
         case .modes:
             return .init(background: AppTheme.Sidebar.modes)
         case .models:

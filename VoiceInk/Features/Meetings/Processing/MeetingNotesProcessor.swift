@@ -48,7 +48,9 @@ struct MeetingNotesProcessor {
     /// Chunks quieter than this are treated as silence and skipped, which also avoids Whisper hallucinations.
     private static let silenceRMS: Float = 0.003
     private static let summaryTimeout: TimeInterval = 600
-    private static let summaryChunkWords = 2500
+    /// Keeps each request well inside the 4K-token context that local models such as Ollama use by default.
+    private static let summaryChunkWords = 1800
+    private static let maximumCondenseRounds = 3
 
     private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "MeetingNotesProcessor")
     private let engine: VoiceInkEngine
@@ -72,14 +74,17 @@ struct MeetingNotesProcessor {
 
         onPhase(String(localized: "Preparing meeting audio…"))
         let audioProcessor = AudioProcessor()
-        let otherSamples = try await loadSamples(input.recording.systemAudioURL, with: audioProcessor)
-        let mySamples = try await loadSamples(input.recording.microphoneURL, with: audioProcessor)
+        let otherSamples = await loadSamples(input.recording.systemAudioURL, with: audioProcessor)
+        let mySamples = await loadSamples(input.recording.microphoneURL, with: audioProcessor)
 
         guard !mySamples.isEmpty || !otherSamples.isEmpty else {
             throw MeetingNotesError.noAudioRecorded
         }
         let mixedURL = input.recording.directory.appendingPathComponent("meeting.wav")
-        try audioProcessor.saveSamplesAsWav(samples: Self.mix(mySamples, otherSamples), to: mixedURL)
+        // Mixing an hour of audio takes a moment, so keep it off the main thread.
+        try await Task.detached(priority: .utility) {
+            try AudioProcessor().saveSamplesAsWav(samples: Self.mix(mySamples, otherSamples), to: mixedURL)
+        }.value
 
         let serviceRegistry = TranscriptionServiceRegistry(
             modelProvider: engine.whisperModelManager,
@@ -181,9 +186,15 @@ struct MeetingNotesProcessor {
 
     // MARK: - Transcription
 
-    private func loadSamples(_ url: URL, with audioProcessor: AudioProcessor) async throws -> [Float] {
+    private func loadSamples(_ url: URL, with audioProcessor: AudioProcessor) async -> [Float] {
         guard FileManager.default.fileExists(atPath: url.path) else { return [] }
-        return try await audioProcessor.processAudioToSamples(url)
+        do {
+            return try await audioProcessor.processAudioToSamples(url)
+        } catch {
+            // Keep going with the other track rather than losing the whole meeting.
+            logger.error("Could not read \(url.lastPathComponent, privacy: .public): \(error, privacy: .public)")
+            return []
+        }
     }
 
     private func transcribeChunk(
@@ -202,16 +213,24 @@ struct MeetingNotesProcessor {
         guard Self.rms(chunk) >= Self.silenceRMS else { return nil }
 
         let url = directory.appendingPathComponent("\(name).wav")
-        try audioProcessor.saveSamplesAsWav(samples: chunk, to: url)
         defer { try? FileManager.default.removeItem(at: url) }
 
-        let raw = try await registry.transcribe(
-            audioURL: url,
-            model: configuration.model,
-            context: configuration.requestContext
-        )
-        let text = TranscriptionOutputFilter.filter(raw).trimmingCharacters(in: .whitespacesAndNewlines)
-        return text.isEmpty ? nil : text
+        do {
+            try audioProcessor.saveSamplesAsWav(samples: chunk, to: url)
+            let raw = try await registry.transcribe(
+                audioURL: url,
+                model: configuration.model,
+                context: configuration.requestContext
+            )
+            let text = TranscriptionOutputFilter.filter(raw).trimmingCharacters(in: .whitespacesAndNewlines)
+            return text.isEmpty ? nil : text
+        } catch is CancellationError {
+            throw CancellationError()
+        } catch {
+            // One bad chunk shouldn't cost the whole meeting.
+            logger.error("Could not transcribe \(name, privacy: .public): \(error, privacy: .public)")
+            return nil
+        }
     }
 
     private static func rms(_ samples: [Float]) -> Float {
@@ -220,7 +239,7 @@ struct MeetingNotesProcessor {
         return value
     }
 
-    private static func mix(_ first: [Float], _ second: [Float]) -> [Float] {
+    nonisolated private static func mix(_ first: [Float], _ second: [Float]) -> [Float] {
         let count = max(first.count, second.count)
         var mixed = [Float](repeating: 0, count: count)
         for index in 0..<count {
@@ -268,12 +287,15 @@ struct MeetingNotesProcessor {
         let model = aiService.currentModel
         let vocabulary = CustomVocabularyService.shared.getCustomVocabulary(from: engine.modelContext)
 
-        // Small local models have short context windows, so long meetings are condensed in parts first.
-        let parts = Self.split(transcript, maxWords: Self.summaryChunkWords)
+        // Small local models have short context windows, so long meetings are condensed in parts first,
+        // repeating until everything fits in one request.
         var source = transcript
-        if parts.count > 1 {
+        var round = 0
+        while Self.wordCount(source) > Self.summaryChunkWords, round < Self.maximumCondenseRounds {
+            let parts = Self.split(source, maxWords: Self.summaryChunkWords)
             var partNotes: [String] = []
             for (index, part) in parts.enumerated() {
+                try Task.checkCancellation()
                 let text = try await aiService.completeChat(
                     provider: provider,
                     modelName: model,
@@ -284,6 +306,7 @@ struct MeetingNotesProcessor {
                 partNotes.append(AIEnhancementOutputFilter.filter(text))
             }
             source = partNotes.joined(separator: "\n\n")
+            round += 1
         }
 
         var systemPrompt = Self.notesPrompt
@@ -302,6 +325,10 @@ struct MeetingNotesProcessor {
             timeout: Self.summaryTimeout
         )
         return AIEnhancementOutputFilter.filter(notes).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    private static func wordCount(_ text: String) -> Int {
+        text.split(whereSeparator: { $0.isWhitespace }).count
     }
 
     private static func split(_ transcript: String, maxWords: Int) -> [String] {
