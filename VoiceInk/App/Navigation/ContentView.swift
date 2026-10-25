@@ -44,7 +44,7 @@ final class MainWindowNavigation: ObservableObject {
 
 struct ContentView: View {
     private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "ContentView")
-    private static let detailBackgroundTintOpacity = 0.50
+    private static let detailBackgroundTintOpacity = 0.90
     @EnvironmentObject private var navigation: MainWindowNavigation
 
     var body: some View {

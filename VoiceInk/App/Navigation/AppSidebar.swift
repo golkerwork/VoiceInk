@@ -104,29 +104,9 @@ private extension ViewType {
         }
     }
 
+    // Dark, minimal look: every icon sits on the same quiet neutral tile instead of a bright color.
     var sidebarIconStyle: SidebarIconStyle {
-        switch self {
-        case .dashboard:
-            return .init(background: AppTheme.Sidebar.dashboard)
-        case .meetings:
-            return .init(background: AppTheme.Sidebar.meetings)
-        case .modes:
-            return .init(background: AppTheme.Sidebar.modes)
-        case .models:
-            return .init(background: AppTheme.Sidebar.models)
-        case .audio:
-            return .init(background: AppTheme.Sidebar.fallback)
-        case .dictionary:
-            return .init(background: AppTheme.Sidebar.dictionary)
-        case .history:
-            return .init(background: AppTheme.Sidebar.audio)
-        case .transcribeAudio:
-            return .init(background: AppTheme.Sidebar.transcribeAudio)
-        case .settings:
-            return .init(background: AppTheme.Sidebar.fallback)
-        case .license:
-            return .init(background: AppTheme.Sidebar.license)
-        }
+        .init(background: AppTheme.Sidebar.tile, foreground: AppTheme.Sidebar.tileForeground)
     }
 }
 

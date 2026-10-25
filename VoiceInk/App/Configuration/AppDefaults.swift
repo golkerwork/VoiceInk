@@ -67,7 +67,7 @@ enum AppDefaults {
 
             // UI & Behavior
             "IsMenuBarOnly": false,
-            AppAppearancePreference.userDefaultsKey: AppAppearancePreference.system.rawValue,
+            AppAppearancePreference.userDefaultsKey: AppAppearancePreference.dark.rawValue,
             AppLanguagePreference.userDefaultsKey: AppLanguagePreference.systemValue,
             // Enhancement
             "SkipShortEnhancement": false,
