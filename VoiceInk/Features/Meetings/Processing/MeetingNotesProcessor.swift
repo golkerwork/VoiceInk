@@ -147,12 +147,18 @@ struct MeetingNotesProcessor {
         var notes: String?
         var notesModelName: String?
         var notesDuration: TimeInterval?
-        if !transcript.isEmpty, let aiService, Self.canSummarize(with: aiService) {
+        if !transcript.isEmpty, let aiService, let notesModel = Self.notesModel(for: aiService) {
             onPhase(String(localized: "Writing meeting notes…"))
             let notesStart = Date()
             do {
-                notes = try await summarize(transcript, appName: input.appName, aiService: aiService)
-                notesModelName = aiService.currentModel
+                notes = try await summarize(
+                    transcript,
+                    appName: input.appName,
+                    aiService: aiService,
+                    provider: notesModel.provider,
+                    model: notesModel.model
+                )
+                notesModelName = notesModel.model
                 notesDuration = Date().timeIntervalSince(notesStart)
             } catch {
                 logger.error("Meeting summary failed: \(error, privacy: .public)")
@@ -278,13 +284,28 @@ struct MeetingNotesProcessor {
 
     // MARK: - Notes
 
-    private static func canSummarize(with aiService: AIService) -> Bool {
-        aiService.selectedProvider != .voiceInkRefine && aiService.isAPIKeyValid
+    /// The chat model that writes meeting notes: the selected AI provider, or the local Ollama model the
+    /// installer set up when the selected provider can only clean up dictation (VoiceInk Refine) or isn't set up.
+    static func notesModel(for aiService: AIService) -> (provider: AIProvider, model: String)? {
+        if aiService.selectedProvider != .voiceInkRefine, aiService.isAPIKeyValid {
+            return (aiService.selectedProvider, aiService.currentModel)
+        }
+        let defaults = UserDefaults.standard
+        if let model = defaults.string(forKey: "OllamaSelectedModel") ?? defaults.string(forKey: "ollamaSelectedModel"),
+            !model.isEmpty
+        {
+            return (.ollama, model)
+        }
+        return nil
     }
 
-    private func summarize(_ transcript: String, appName: String?, aiService: AIService) async throws -> String {
-        let provider = aiService.selectedProvider
-        let model = aiService.currentModel
+    private func summarize(
+        _ transcript: String,
+        appName: String?,
+        aiService: AIService,
+        provider: AIProvider,
+        model: String
+    ) async throws -> String {
         let vocabulary = CustomVocabularyService.shared.getCustomVocabulary(from: engine.modelContext)
 
         // Small local models have short context windows, so long meetings are condensed in parts first,

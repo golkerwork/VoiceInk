@@ -177,6 +177,7 @@ struct VoiceInkApp: App {
         appDelegate.menuBarManager = menuBarManager
 
         MeetingNotesCoordinator.shared.configure(engine: engine, aiService: aiService)
+        WisprStyleSetup.applyIfNeeded(enhancementService: enhancementService, aiService: aiService)
 
         // Ensure no lingering recording state from previous runs
         Task {

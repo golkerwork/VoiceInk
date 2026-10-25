@@ -97,12 +97,12 @@ struct MeetingsView: View {
 
     @ViewBuilder
     private var notesModelStatus: some View {
-        if aiService.selectedProvider != .voiceInkRefine && aiService.isAPIKeyValid {
+        if let notesModel = MeetingNotesProcessor.notesModel(for: aiService) {
             Text(
                 String(
                     format: String(localized: "Notes are written by %@ (%@)."),
-                    aiService.selectedProvider.rawValue,
-                    aiService.currentModel
+                    notesModel.provider.rawValue,
+                    notesModel.model
                 )
             )
             .font(.system(size: 12))

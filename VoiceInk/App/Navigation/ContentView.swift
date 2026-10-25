@@ -46,6 +46,8 @@ struct ContentView: View {
     private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "ContentView")
     private static let detailBackgroundTintOpacity = 0.90
     @EnvironmentObject private var navigation: MainWindowNavigation
+    @EnvironmentObject private var enhancementService: AIEnhancementService
+    @EnvironmentObject private var aiService: AIService
 
     var body: some View {
         HStack(spacing: 0) {
@@ -57,6 +59,7 @@ struct ContentView: View {
         .frame(minHeight: AppWindowLayout.minimumHeight)
         .onAppear {
             logger.notice("ContentView appeared")
+            WisprStyleSetup.applyIfNeeded(enhancementService: enhancementService, aiService: aiService)
         }
         .onDisappear {
             logger.notice("ContentView disappeared")
