@@ -5,6 +5,11 @@ set -euo pipefail
 
 cd "$(dirname "$0")"
 
+echo "==> Getting the latest version..."
+# Builds can rewrite the strings catalog; discard that so the update applies cleanly.
+git checkout -- VoiceInk/Localizable.xcstrings 2>/dev/null || true
+git pull --ff-only || echo "Could not download updates; building the version already on this Mac."
+
 echo "==> Checking for Xcode..."
 if ! xcodebuild -version >/dev/null 2>&1; then
     echo ""
