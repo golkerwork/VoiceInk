@@ -15,6 +15,28 @@ if ! xcodebuild -version >/dev/null 2>&1; then
     exit 1
 fi
 
+if [ -x /opt/homebrew/bin/brew ]; then
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [ -x /usr/local/bin/brew ]; then
+    eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+echo "==> Checking for CMake..."
+if ! command -v cmake >/dev/null 2>&1; then
+    if command -v brew >/dev/null 2>&1; then
+        echo "Installing CMake with Homebrew..."
+        brew install cmake
+    else
+        echo ""
+        echo "CMake is required to build the speech engine, and it installs with Homebrew."
+        echo "1. Install Homebrew by pasting the command shown on https://brew.sh into Terminal."
+        echo "2. Double-click Install.command again. It will install CMake for you."
+        open "https://brew.sh" || true
+        read -r -p "Press Return to close..."
+        exit 1
+    fi
+fi
+
 if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development"; then
     echo ""
     echo "Note: no Apple Development certificate found, so the app will be ad-hoc signed."
