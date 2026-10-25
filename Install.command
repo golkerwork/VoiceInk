@@ -3,6 +3,9 @@
 # Run it again any time to update after pulling new code.
 set -euo pipefail
 
+# Braces make bash read the whole script before running it, so the git pull below can safely update this file.
+{
+
 cd "$(dirname "$0")"
 
 echo "==> Getting the latest version..."
@@ -74,3 +77,5 @@ echo ""
 echo "Done. VoiceInk is in /Applications and running in your menu bar."
 echo "Tip: set System Settings > Keyboard > 'Press globe key to' > Do Nothing, then pick Fn as the shortcut in VoiceInk."
 read -r -p "Press Return to close..."
+exit 0
+}
