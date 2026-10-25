@@ -15,6 +15,12 @@ if ! xcodebuild -version >/dev/null 2>&1; then
     exit 1
 fi
 
+echo "==> Checking for the Metal Toolchain..."
+if ! xcrun metal -v >/dev/null 2>&1; then
+    echo "Downloading the Metal Toolchain (one-time, a few hundred MB)..."
+    xcodebuild -downloadComponent MetalToolchain
+fi
+
 if [ -x /opt/homebrew/bin/brew ]; then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 elif [ -x /usr/local/bin/brew ]; then
