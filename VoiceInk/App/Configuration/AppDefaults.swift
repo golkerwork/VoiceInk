@@ -66,7 +66,7 @@ enum AppDefaults {
             CleanupSettingsKeys.audioRetentionPeriod: 7,
 
             // UI & Behavior
-            "IsMenuBarOnly": false,
+            "IsMenuBarOnly": true,
             AppAppearancePreference.userDefaultsKey: AppAppearancePreference.system.rawValue,
             AppLanguagePreference.userDefaultsKey: AppLanguagePreference.systemValue,
             // Enhancement
