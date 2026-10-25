@@ -51,10 +51,12 @@ if ! command -v cmake >/dev/null 2>&1; then
     fi
 fi
 
+AD_HOC_SIGNED=false
 if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development"; then
+    AD_HOC_SIGNED=true
     echo ""
     echo "Note: no Apple Development certificate found, so the app will be ad-hoc signed."
-    echo "macOS may ask for Microphone/Accessibility permissions again after each update."
+    echo "You'll need to turn VoiceInk back on in Accessibility after each update."
     echo "To avoid that: Xcode > Settings > Accounts > add your Apple ID > Manage Certificates > + Apple Development."
     echo ""
 fi
@@ -69,6 +71,11 @@ rm -rf "/Applications/VoiceInk.app"
 ditto "$HOME/Downloads/VoiceInk.app" "/Applications/VoiceInk.app"
 rm -rf "$HOME/Downloads/VoiceInk.app"
 xattr -cr "/Applications/VoiceInk.app"
+if [ "$AD_HOC_SIGNED" = true ]; then
+    # The old grants no longer match the new build but still look switched on. Clear them so VoiceInk asks again.
+    tccutil reset Accessibility com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true
+    tccutil reset ScreenCapture com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true
+fi
 
 echo "==> Setting up free local AI for meeting notes and text cleanup..."
 setup_local_ai() {
@@ -115,6 +122,9 @@ open "/Applications/VoiceInk.app"
 
 echo ""
 echo "Done. VoiceInk is in /Applications and running in your menu bar."
+if [ "$AD_HOC_SIGNED" = true ]; then
+    echo "When macOS asks, turn VoiceInk on in Accessibility, then quit and reopen VoiceInk."
+fi
 echo "Tip: set System Settings > Keyboard > 'Press globe key to' > Do Nothing, then pick Fn as the shortcut in VoiceInk."
 read -r -p "Press Return to close..."
 exit 0
