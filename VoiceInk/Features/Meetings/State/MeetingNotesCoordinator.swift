@@ -136,6 +136,10 @@ final class MeetingNotesCoordinator: ObservableObject {
     // MARK: - Detection
 
     private func poll() {
+        // While idle with nothing to watch for, skip the Core Audio query entirely.
+        if state == .idle, !isDetectionEnabled || DictationPauseController.shared.isPaused {
+            return
+        }
         let activeApps = MeetingAppMonitor.activeMeetingApps()
         let activeIDs = Set(activeApps.map(\.bundleID))
         promptedApps.formIntersection(activeIDs)

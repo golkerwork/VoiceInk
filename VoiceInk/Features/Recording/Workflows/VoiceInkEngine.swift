@@ -818,6 +818,11 @@ class VoiceInkEngine: NSObject, ObservableObject {
                 enhancementService: enhancementService,
                 aiService: aiService
             )
+            if initialConfiguration.isEnabled, initialConfiguration.provider == .ollama {
+                OllamaWarmup.load(model: initialConfiguration.modelName ?? AIProvider.ollama.defaultModel)
+                return
+            }
+
             guard initialConfiguration.isEnabled,
                 initialConfiguration.provider == .voiceInkRefine
             else {

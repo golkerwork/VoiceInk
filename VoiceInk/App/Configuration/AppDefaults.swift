@@ -56,7 +56,7 @@ enum AppDefaults {
             "SelectedLanguage": "en",
             "AppendTrailingSpace": true,
             "RecorderType": "mini",
-            RecorderDisplaySettingsKeys.showLiveTranscript: true,
+            RecorderDisplaySettingsKeys.showLiveTranscript: false,
             CloudTranscriptionSettings.timeoutKey: CloudTranscriptionSettings.defaultTimeout,
 
             // Cleanup
@@ -70,8 +70,9 @@ enum AppDefaults {
             AppAppearancePreference.userDefaultsKey: AppAppearancePreference.dark.rawValue,
             AppLanguagePreference.userDefaultsKey: AppLanguagePreference.systemValue,
             // Enhancement
-            "SkipShortEnhancement": false,
-            "ShortEnhancementWordThreshold": 3,
+            // Short dictations paste right away; Whisper already punctuates them.
+            "SkipShortEnhancement": true,
+            "ShortEnhancementWordThreshold": 6,
             EnhancementRequestSettings.timeoutKey: EnhancementRequestSettings.defaultTimeoutSeconds,
             EnhancementRequestSettings.retryOnTimeoutKey: EnhancementRequestSettings.defaultRetryOnTimeout,
 

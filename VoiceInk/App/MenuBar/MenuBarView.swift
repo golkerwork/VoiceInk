@@ -16,6 +16,7 @@ struct MenuBarView: View {
     @ObservedObject private var modeManager = ModeManager.shared
     @ObservedObject var audioDeviceManager = AudioDeviceManager.shared
     @ObservedObject private var meetingNotes = MeetingNotesCoordinator.shared
+    @ObservedObject private var pauseController = DictationPauseController.shared
     @AppStorage(OnboardingSettings.completedV2Key) private var hasCompletedOnboardingV2 = false
 
     var body: some View {
@@ -47,6 +48,15 @@ struct MenuBarView: View {
             Button("Toggle Recorder") {
                 recorderUIManager.handleToggleRecorderPanelNotification()
             }
+            .disabled(pauseController.isPaused)
+
+            Toggle(
+                "Pause VoiceInk",
+                isOn: Binding(
+                    get: { pauseController.isPaused },
+                    set: { pauseController.setPaused($0) }
+                )
+            )
 
             Divider()
 
