@@ -263,7 +263,7 @@ struct DictionaryQuickAddView: View {
                 HStack(spacing: 7) {
                     Text("Add Now")
                     Text("↵")
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(AppTheme.Text.muted)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 3)

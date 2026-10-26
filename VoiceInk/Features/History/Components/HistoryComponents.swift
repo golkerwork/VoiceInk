@@ -260,7 +260,7 @@ struct HistoryCommandButton: View {
                     .fixedSize(horizontal: true, vertical: false)
                 if let shortcut {
                     Text(shortcut)
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(AppTheme.Text.muted)
                         .padding(.horizontal, 5)
                         .padding(.vertical, 3)

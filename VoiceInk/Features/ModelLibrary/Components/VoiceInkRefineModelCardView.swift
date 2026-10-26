@@ -29,10 +29,10 @@ struct VoiceInkRefineModelCardView: View {
 
             Text("New")
                 .font(.system(size: 10, weight: .medium))
-                .foregroundColor(.black)
+                .foregroundColor(.white)
                 .padding(.horizontal, 6)
                 .padding(.vertical, 2)
-                .background(Capsule().fill(Color(red: 0.96, green: 0.79, blue: 0.63)))
+                .background(Capsule().fill(AppTheme.Palette.accent))
 
             Spacer()
         }

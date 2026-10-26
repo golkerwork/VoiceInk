@@ -65,7 +65,7 @@ struct MeetingsView: View {
                     recordingLabel(elapsed: context.date.timeIntervalSince(since), appName: appName),
                     systemImage: "record.circle.fill"
                 )
-                .foregroundStyle(.red)
+                .foregroundStyle(AppTheme.Status.error)
             }
         case .processing(let phase):
             HStack(spacing: 8) {
@@ -89,7 +89,7 @@ struct MeetingsView: View {
                 meetingNotes.stopRecording()
             }
             .buttonStyle(.borderedProminent)
-            .tint(.red)
+            .tint(AppTheme.Status.error)
         case .starting, .processing:
             EmptyView()
         }
@@ -110,7 +110,7 @@ struct MeetingsView: View {
         } else {
             HStack(spacing: 8) {
                 Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(.orange)
+                    .foregroundStyle(AppTheme.Status.warningStrong)
                 Text("Choose an AI model to get meeting notes. Without one you only get the transcript.")
                     .font(.system(size: 12))
                 Spacer()
