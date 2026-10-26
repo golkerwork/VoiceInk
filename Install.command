@@ -51,6 +51,24 @@ if ! command -v cmake >/dev/null 2>&1; then
     fi
 fi
 
+# An Apple Development certificate that's listed but not valid is usually missing Apple's
+# WWDR G3 intermediate certificate, so the build would quietly fall back to ad-hoc signing.
+if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development" \
+    && security find-identity -p codesigning 2>/dev/null | grep -q "Apple Development"; then
+    echo "==> Adding Apple's intermediate certificate so your Apple Development certificate is trusted..."
+    WWDR_CER="${TMPDIR:-/tmp}/AppleWWDRCAG3.cer"
+    if curl -fsSL -o "$WWDR_CER" https://www.apple.com/certificateauthority/AppleWWDRCAG3.cer; then
+        security import "$WWDR_CER" -k "$HOME/Library/Keychains/login.keychain-db" >/dev/null 2>&1 || true
+    fi
+    rm -f "$WWDR_CER"
+fi
+
+# Grants made for an ad-hoc build don't carry over to a signed one either.
+WAS_AD_HOC_SIGNED=false
+if codesign -dv "/Applications/VoiceInk.app" 2>&1 | grep -q "Signature=adhoc"; then
+    WAS_AD_HOC_SIGNED=true
+fi
+
 AD_HOC_SIGNED=false
 if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development"; then
     AD_HOC_SIGNED=true
@@ -73,7 +91,7 @@ rm -rf "$HOME/Downloads/VoiceInk.app"
 xattr -cr "/Applications/VoiceInk.app"
 # Tell Finder and the Dock the app changed, so a new icon shows up right away.
 touch "/Applications/VoiceInk.app"
-if [ "$AD_HOC_SIGNED" = true ]; then
+if [ "$AD_HOC_SIGNED" = true ] || [ "$WAS_AD_HOC_SIGNED" = true ]; then
     # The old grants no longer match the new build but still look switched on. Clear them so VoiceInk asks again.
     tccutil reset Accessibility com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true
     tccutil reset ScreenCapture com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true
@@ -124,7 +142,7 @@ open "/Applications/VoiceInk.app"
 
 echo ""
 echo "Done. VoiceInk is in /Applications and running in your menu bar."
-if [ "$AD_HOC_SIGNED" = true ]; then
+if [ "$AD_HOC_SIGNED" = true ] || [ "$WAS_AD_HOC_SIGNED" = true ]; then
     echo "When macOS asks, turn VoiceInk on in Accessibility, then quit and reopen VoiceInk."
 fi
 echo "Tip: set System Settings > Keyboard > 'Press globe key to' > Do Nothing, then pick Fn as the shortcut in VoiceInk."
