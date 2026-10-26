@@ -178,6 +178,7 @@ struct VoiceInkApp: App {
 
         MeetingNotesCoordinator.shared.configure(engine: engine, aiService: aiService)
         WisprStyleSetup.applyIfNeeded(enhancementService: enhancementService, aiService: aiService)
+        AutoLanguageSetup.applyIfNeeded()
 
         // Ensure no lingering recording state from previous runs
         Task {
