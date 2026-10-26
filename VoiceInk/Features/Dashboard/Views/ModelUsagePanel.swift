@@ -116,7 +116,7 @@ private struct ModelUsageDistributionRow: View {
                         .frame(maxWidth: .infinity, alignment: .leading)
 
                     Text(share, format: .percent.precision(.fractionLength(0)))
-                        .font(.system(size: 10, weight: .medium, design: .rounded))
+                        .font(.system(size: 10, weight: .medium))
                         .foregroundStyle(AppTheme.Text.secondary)
                         .lineLimit(1)
                         .minimumScaleFactor(0.82)

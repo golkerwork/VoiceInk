@@ -10,7 +10,7 @@ struct LicenseManagementView: View {
 
     private let appVersion = Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "Unknown"
     private let appBuild = Bundle.main.infoDictionary?["CFBundleVersion"] as? String ?? "Unknown"
-    private let licenseTitleFont = Font.system(size: 28, weight: .semibold, design: .rounded)
+    private let licenseTitleFont = Font.system(size: 28, weight: .semibold)
     private let neutralIconColor = AppTheme.Text.secondary
 
     private var reportPanelAnimation: Animation {
@@ -232,7 +232,7 @@ struct LicenseManagementView: View {
                 .padding(.top, 8)
         } label: {
             Text("Resources")
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(.primary)
                 .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -408,7 +408,7 @@ struct LicenseActiveSummaryCard<Actions: View>: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     Text(title)
-                        .font(.system(size: 28, weight: .semibold, design: .rounded))
+                        .font(.system(size: 28, weight: .semibold))
 
                     Text(subtitle)
                         .font(.subheadline)
@@ -541,7 +541,7 @@ private struct ReportFeedbackBottomPanel: View {
             VStack(spacing: 20) {
                 VStack(spacing: 18) {
                     Text("Thank you for using VoiceInk")
-                        .font(.system(size: 24, weight: .semibold, design: .rounded))
+                        .font(.system(size: 24, weight: .semibold))
                         .multilineTextAlignment(.center)
                         .fixedSize(horizontal: false, vertical: true)
 

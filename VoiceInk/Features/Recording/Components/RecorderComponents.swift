@@ -362,7 +362,7 @@ struct RecorderStatusDisplay: View {
             } else if currentState == .recording {
                 AudioVisualizer(
                     audioMeterProvider: audioMeterProvider,
-                    color: .white,
+                    color: AppTheme.Palette.accentText,
                     isActive: true
                 )
                     .scaleEffect(y: menuBarHeight != nil ? min(1.0, (menuBarHeight! - 8) / 25) : 1.0, anchor: .center)

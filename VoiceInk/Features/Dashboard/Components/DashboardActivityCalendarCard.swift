@@ -232,7 +232,7 @@ struct DashboardActivityCalendarCard: View {
                 .foregroundStyle(AppTheme.Text.secondary)
 
             Text(value)
-                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                .font(.system(size: 20, weight: .semibold))
                 .foregroundStyle(AppTheme.Text.primary)
                 .monospacedDigit()
                 .lineLimit(1)
@@ -272,11 +272,11 @@ private struct DashboardActivityCalendarTooltip: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(point.accessibilityLabel)
-                .font(.system(size: 10, weight: .bold, design: .rounded))
+                .font(.system(size: 10, weight: .bold))
                 .foregroundStyle(AppTheme.Text.secondary)
 
             Text(wordsText)
-                .font(.system(size: 12, weight: .bold, design: .rounded))
+                .font(.system(size: 12, weight: .bold))
                 .foregroundStyle(AppTheme.Text.primary)
                 .monospacedDigit()
         }

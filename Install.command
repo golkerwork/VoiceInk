@@ -71,6 +71,8 @@ rm -rf "/Applications/VoiceInk.app"
 ditto "$HOME/Downloads/VoiceInk.app" "/Applications/VoiceInk.app"
 rm -rf "$HOME/Downloads/VoiceInk.app"
 xattr -cr "/Applications/VoiceInk.app"
+# Tell Finder and the Dock the app changed, so a new icon shows up right away.
+touch "/Applications/VoiceInk.app"
 if [ "$AD_HOC_SIGNED" = true ]; then
     # The old grants no longer match the new build but still look switched on. Clear them so VoiceInk asks again.
     tccutil reset Accessibility com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true

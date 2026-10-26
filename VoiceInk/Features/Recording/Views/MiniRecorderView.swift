@@ -94,11 +94,18 @@ struct MiniRecorderView<S: RecorderStateProvider & ObservableObject>: View {
             controlBar
         }
         .frame(width: hasAssistantResponse ? assistantWidth : (hasLiveTranscript ? expandedWidth : compactWidth))
-        .background(Color.black)
+        .background(AppTheme.Palette.recorder)
         .clipShape(
             RoundedRectangle(
                 cornerRadius: hasLiveTranscript || hasAssistantResponse ? expandedCornerRadius : compactCornerRadius,
                 style: .continuous)
+        )
+        .overlay(
+            RoundedRectangle(
+                cornerRadius: hasLiveTranscript || hasAssistantResponse ? expandedCornerRadius : compactCornerRadius,
+                style: .continuous
+            )
+            .strokeBorder(Color.white.opacity(0.10), lineWidth: 1)
         )
         .animation(.easeInOut(duration: 0.3), value: hasLiveTranscript)
         .animation(.easeInOut(duration: 0.3), value: hasAssistantResponse)

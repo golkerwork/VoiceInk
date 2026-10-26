@@ -354,7 +354,7 @@ struct DashboardContent: View {
     }
 
     private var displayNameFont: Font {
-        .system(size: Self.displayNameFontSize, weight: .bold, design: .rounded)
+        .system(size: Self.displayNameFontSize, weight: .bold)
     }
 
     private var dismissingSpacer: some View {

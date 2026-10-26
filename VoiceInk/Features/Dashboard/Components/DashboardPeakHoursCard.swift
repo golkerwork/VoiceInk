@@ -43,7 +43,7 @@ struct DashboardPeakHoursCard: View {
     private var header: some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text("Peak Dictation Hours")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(AppTheme.Text.primary)
                 .lineLimit(1)
                 .minimumScaleFactor(0.84)
@@ -56,7 +56,7 @@ struct DashboardPeakHoursCard: View {
                     .foregroundStyle(AppTheme.Text.secondary.opacity(0.78))
 
                 Text(canShowPattern ? windowText : "--")
-                    .font(.system(size: 13, weight: .bold, design: .rounded))
+                    .font(.system(size: 13, weight: .bold))
                     .foregroundStyle(AppTheme.Text.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.76)

@@ -16,12 +16,12 @@ struct DashboardEditorialSummaryCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("You made room for")
-                .font(.system(size: 15, weight: .medium, design: .rounded))
+                .font(.system(size: 15, weight: .medium))
                 .foregroundStyle(AppTheme.Text.primary)
 
             HStack(alignment: .lastTextBaseline, spacing: 10) {
                 Text(summary.hasData ? Formatters.formattedSavedTime(summary.timeSaved) : "--")
-                    .font(.system(size: 52, weight: .bold, design: .rounded))
+                    .font(.system(size: 52, weight: .bold))
                     .tracking(-1)
                     .foregroundStyle(AppTheme.Insights.productivity)
                     .monospacedDigit()
@@ -30,7 +30,7 @@ struct DashboardEditorialSummaryCard: View {
                     .layoutPriority(1)
 
                 Text("of focused work")
-                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(AppTheme.Text.secondary)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
@@ -73,7 +73,7 @@ struct DashboardEditorialSummaryCard: View {
     private func fact(value: String, caption: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(value)
-                .font(.system(size: 24, weight: .bold, design: .rounded))
+                .font(.system(size: 24, weight: .bold))
                 .tracking(-0.4)
                 .foregroundStyle(AppTheme.Text.primary)
                 .monospacedDigit()
@@ -81,7 +81,7 @@ struct DashboardEditorialSummaryCard: View {
                 .minimumScaleFactor(0.8)
 
             Text(caption)
-                .font(.system(size: 12, weight: .medium, design: .rounded))
+                .font(.system(size: 12, weight: .medium))
                 .foregroundStyle(AppTheme.Text.secondary)
                 .lineSpacing(2)
                 .fixedSize(horizontal: false, vertical: true)

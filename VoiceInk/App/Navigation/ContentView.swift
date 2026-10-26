@@ -44,7 +44,6 @@ final class MainWindowNavigation: ObservableObject {
 
 struct ContentView: View {
     private let logger = Logger(subsystem: "com.prakashjoshipax.voiceink", category: "ContentView")
-    private static let detailBackgroundTintOpacity = 0.90
     @EnvironmentObject private var navigation: MainWindowNavigation
     @EnvironmentObject private var enhancementService: AIEnhancementService
     @EnvironmentObject private var aiService: AIService
@@ -57,6 +56,7 @@ struct ContentView: View {
         }
         .frame(width: AppWindowLayout.width)
         .frame(minHeight: AppWindowLayout.minimumHeight)
+        .tint(AppTheme.Palette.accent)
         .onAppear {
             logger.notice("ContentView appeared")
             WisprStyleSetup.applyIfNeeded(enhancementService: enhancementService, aiService: aiService)
@@ -80,16 +80,8 @@ struct ContentView: View {
     }
 
     private var detailBackground: some View {
-        ZStack {
-            VisualEffectView(
-                material: .sidebar,
-                blendingMode: .behindWindow
-            )
-
-            AppTheme.Surface.window
-                .opacity(Self.detailBackgroundTintOpacity)
-        }
-        .ignoresSafeArea(.container, edges: .top)
+        AppTheme.Palette.background
+            .ignoresSafeArea(.container, edges: .top)
     }
 
     @ViewBuilder
