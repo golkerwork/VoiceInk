@@ -197,13 +197,18 @@ class TranscriptionPipeline {
                             configuration: resolvedEnhancementConfiguration,
                             contextSnapshot: contextSnapshot
                         )
-                        transcription.enhancedText = enhancementResult.text
+                        let enhancedText = CleanupLanguageGuard.resolvedText(
+                            original: textForAI,
+                            cleaned: enhancementResult.text,
+                            promptId: resolvedEnhancementConfiguration.prompt?.id
+                        )
+                        transcription.enhancedText = enhancedText
                         transcription.promptName =
                             enhancementResult.promptName ?? resolvedEnhancementConfiguration.prompt?.title
                         transcription.enhancementDuration = enhancementResult.duration
                         transcription.aiRequestSystemMessage = enhancementResult.systemMessage
                         transcription.aiRequestUserMessage = enhancementResult.userMessage
-                        finalText = enhancementResult.text
+                        finalText = enhancedText
                     } catch {
                         let errorDescription = EnhancementFailureFormatter.description(for: error)
                         let failureMessage = EnhancementFailureFormatter.message(description: errorDescription)
