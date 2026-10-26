@@ -51,9 +51,17 @@ if ! command -v cmake >/dev/null 2>&1; then
     fi
 fi
 
+# Signing with a certificate asks for the login keychain password. When that password
+# isn't known, `touch ~/.voiceink-adhoc-signing` keeps every update on ad-hoc signing.
+ADHOC_MARKER="$HOME/.voiceink-adhoc-signing"
+if [ -f "$ADHOC_MARKER" ]; then
+    export LOCAL_CODESIGN_IDENTITY="-"
+fi
+
 # An Apple Development certificate that's listed but not valid is usually missing Apple's
 # WWDR G3 intermediate certificate, so the build would quietly fall back to ad-hoc signing.
-if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development" \
+if [ ! -f "$ADHOC_MARKER" ] \
+    && ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development" \
     && security find-identity -p codesigning 2>/dev/null | grep -q "Apple Development"; then
     echo "==> Adding Apple's intermediate certificate so your Apple Development certificate is trusted..."
     WWDR_CER="${TMPDIR:-/tmp}/AppleWWDRCAG3.cer"
@@ -70,7 +78,7 @@ if codesign -dv "/Applications/VoiceInk.app" 2>&1 | grep -q "Signature=adhoc"; t
 fi
 
 AD_HOC_SIGNED=false
-if ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development"; then
+if [ -f "$ADHOC_MARKER" ] || ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development"; then
     AD_HOC_SIGNED=true
     echo ""
     echo "Note: no Apple Development certificate found, so the app will be ad-hoc signed."
