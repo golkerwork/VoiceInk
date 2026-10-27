@@ -6,7 +6,7 @@ struct DashboardTranscriptCards: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
             Text("Recent Transcripts")
-                .font(.system(size: 18, weight: .bold, design: .rounded))
+                .font(.system(size: 18, weight: .bold))
                 .foregroundStyle(AppTheme.Text.primary)
                 .lineLimit(1)
 

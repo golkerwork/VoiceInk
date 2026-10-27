@@ -64,7 +64,7 @@ enum PromptTemplates {
                 title: "Chat",
                 promptText: """
                     <TASK>
-                    Rewrite <TRANSCRIPT> as an informal, concise, and conversational chat message.
+                    Rewrite <TRANSCRIPT> as an informal, concise, and conversational chat message in the language it was spoken in.
                     </TASK>
 
                     <RULES>

@@ -248,6 +248,14 @@ class RecorderUIManager: ObservableObject, RecorderPanelPresenting {
                 await dismissRecorderPanel()
             }
         } else {
+            guard !DictationPauseController.shared.isPaused else {
+                NotificationManager.shared.showNotification(
+                    title: String(localized: "VoiceInk is paused. Resume it from the menu bar."),
+                    type: .info,
+                    duration: 3
+                )
+                return
+            }
             SoundManager.shared.playStartSound()
             isRecorderPanelVisible = true
             await engine.toggleRecord(modeId: modeId)

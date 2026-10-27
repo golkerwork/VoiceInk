@@ -354,7 +354,7 @@ struct DashboardContent: View {
     }
 
     private var displayNameFont: Font {
-        .system(size: Self.displayNameFontSize, weight: .bold, design: .rounded)
+        .system(size: Self.displayNameFontSize, weight: .bold)
     }
 
     private var dismissingSpacer: some View {
@@ -554,7 +554,7 @@ struct DashboardContent: View {
     @ViewBuilder
     private var footerStarButtonLabel: some View {
         if starPrompt.openFailed {
-            footerActionLabel(icon: "exclamationmark.triangle.fill", title: "Couldn't open — try again", color: .orange)
+            footerActionLabel(icon: "exclamationmark.triangle.fill", title: "Couldn't open — try again", color: AppTheme.Status.warningStrong)
         } else {
             switch starPrompt.completionState {
             case .starred:

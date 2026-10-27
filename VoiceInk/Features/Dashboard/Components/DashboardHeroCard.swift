@@ -8,8 +8,8 @@ enum DashboardHeroHeadline {
 }
 
 struct DashboardHeroCard: View {
-    private static let headlineFont: Font = .system(size: 23, weight: .bold, design: .rounded)
-    private static let highlightedHeadlineFont: Font = .system(size: 30, weight: .black, design: .rounded)
+    private static let headlineFont: Font = .system(size: 22, weight: .semibold)
+    private static let highlightedHeadlineFont: Font = .system(size: 30, weight: .bold)
 
     let isLocked: Bool
     let headline: DashboardHeroHeadline
@@ -58,7 +58,7 @@ struct DashboardHeroCard: View {
                 .frame(maxWidth: 720, alignment: .leading)
 
             Text(subtext)
-                .font(.system(size: 15, weight: .semibold))
+                .font(.system(size: 14, weight: .medium))
                 .foregroundStyle(DashboardMomentumBackground.subtext)
                 .frame(maxWidth: 620, alignment: .leading)
         }
@@ -99,7 +99,7 @@ struct DashboardHeroCard: View {
         HStack(alignment: .center, spacing: 14) {
             ZStack {
                 RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(Color.white.opacity(0.78))
+                    .fill(DashboardMomentumBackground.chip)
 
                 Image(systemName: "lock.fill")
                     .font(.system(size: 17, weight: .bold))
@@ -108,7 +108,7 @@ struct DashboardHeroCard: View {
             .frame(width: 42, height: 42)
 
             Text("Continue using VoiceInk to unlock stats and insights.")
-                .font(.system(size: 26, weight: .black, design: .rounded))
+                .font(.system(size: 22, weight: .semibold))
                 .foregroundStyle(DashboardMomentumBackground.headline)
                 .frame(maxWidth: 540, alignment: .leading)
         }
@@ -157,10 +157,10 @@ private struct DashboardMomentumActionLabel: View {
 
     private var backgroundColor: Color {
         if isPrimary {
-            return DashboardMomentumBackground.accent
+            return DashboardMomentumBackground.buttonFill
         }
 
-        return isLocked ? Color.white.opacity(0.64) : Color.white.opacity(0.82)
+        return DashboardMomentumBackground.chip
     }
 
     private var borderColor: Color {
@@ -168,11 +168,11 @@ private struct DashboardMomentumActionLabel: View {
             return Color.clear
         }
 
-        return isLocked ? DashboardMomentumBackground.accent.opacity(0.22) : Color.black.opacity(0.08)
+        return Color.white.opacity(isLocked ? 0.08 : 0.12)
     }
 
     private var shadowColor: Color {
-        isPrimary ? DashboardMomentumBackground.accent.opacity(0.18) : Color.black.opacity(0.06)
+        isPrimary ? DashboardMomentumBackground.buttonFill.opacity(0.30) : Color.clear
     }
 }
 
@@ -188,7 +188,7 @@ private struct DashboardImpactBackground: View {
                 .saturation(isLocked ? 0.78 : 1)
 
             if isLocked {
-                Color.white.opacity(0.32)
+                Color.black.opacity(0.30)
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: DashboardLayout.cardCornerRadius, style: .continuous))
@@ -199,8 +199,11 @@ private struct DashboardImpactBackground: View {
     }
 }
 
+/// The banner image is always dark, so its text stays light in both appearances.
 private struct DashboardMomentumBackground {
-    static let accent = Color(red: 0.76, green: 0.31, blue: 0.08)
-    static let headline = Color(red: 0.10, green: 0.08, blue: 0.06)
-    static let subtext = Color(red: 0.40, green: 0.34, blue: 0.28)
+    static let accent = Color(nsColor: NSColor(srgbHex: 0xA29BFE))
+    static let buttonFill = AppTheme.Palette.accent
+    static let headline = Color.white
+    static let subtext = Color.white.opacity(0.62)
+    static let chip = Color.white.opacity(0.08)
 }

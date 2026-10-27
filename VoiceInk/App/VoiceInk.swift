@@ -176,6 +176,10 @@ struct VoiceInkApp: App {
 
         appDelegate.menuBarManager = menuBarManager
 
+        MeetingNotesCoordinator.shared.configure(engine: engine, aiService: aiService)
+        WisprStyleSetup.applyIfNeeded(enhancementService: enhancementService, aiService: aiService)
+        AutoLanguageSetup.applyIfNeeded()
+
         // Ensure no lingering recording state from previous runs
         Task {
             await recorderUIManager.resetOnLaunch()
@@ -426,6 +430,10 @@ struct VoiceInkApp: App {
         didShowLaunchReminders = true
 
         if !AXIsProcessTrusted() {
+            // Builds signed ad hoc lose this permission on every update. Asking puts VoiceInk back in the
+            // Accessibility list and shows the system prompt, so turning it on again is one switch.
+            let options: NSDictionary = [kAXTrustedCheckOptionPrompt.takeUnretainedValue() as String: true]
+            AXIsProcessTrustedWithOptions(options)
             NotificationManager.shared.showNotification(
                 title: String(localized: "Accessibility permission is not provided"),
                 type: .warning,

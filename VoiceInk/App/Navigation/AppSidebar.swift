@@ -30,13 +30,13 @@ struct AppSidebar: View {
     }
 
     private var sidebarBackground: some View {
-        VisualEffectView(material: .sidebar, blendingMode: .behindWindow)
+        AppTheme.Palette.sidebar
             .ignoresSafeArea(.container, edges: .top)
     }
 
     private var sidebarDivider: some View {
         Rectangle()
-            .fill(AppTheme.Border.control.opacity(0.55))
+            .fill(AppTheme.Palette.border)
             .frame(width: 1)
             .ignoresSafeArea(.container, edges: .top)
     }
@@ -68,6 +68,7 @@ private extension ViewType {
 
     static let primaryItems: [ViewType] = [
         .dashboard,
+        .meetings,
         .modes,
         .transcribeAudio,
         .history,
@@ -76,21 +77,32 @@ private extension ViewType {
         .audio,
     ]
 
-    static let secondaryItems: [ViewType] = [
-        .settings,
-        .license,
-    ]
+    // Local builds are already unlocked, so the license page would only be an upsell.
+    #if LOCAL_BUILD
+        static let secondaryItems: [ViewType] = [.settings]
+        private static let hiddenItems: Set<ViewType> = [.license]
+    #else
+        static let secondaryItems: [ViewType] = [
+            .settings,
+            .license,
+        ]
+        private static let hiddenItems: Set<ViewType> = []
+    #endif
 
     static func assertSidebarItemsCoverAllCases() {
         #if DEBUG
             let sidebarItems = primaryItems + secondaryItems
-            assert(Set(sidebarItems) == Set(allCases) && sidebarItems.count == allCases.count)
+            assert(
+                Set(sidebarItems).union(hiddenItems) == Set(allCases)
+                    && sidebarItems.count + hiddenItems.count == allCases.count
+            )
         #endif
     }
 
     var icon: String {
         switch self {
         case .dashboard: return "gauge.medium"
+        case .meetings: return "person.2.wave.2.fill"
         case .transcribeAudio: return "waveform.path"
         case .history: return "doc.text.fill"
         case .models: return "cpu"
@@ -102,27 +114,11 @@ private extension ViewType {
         }
     }
 
-    var sidebarIconStyle: SidebarIconStyle {
-        switch self {
-        case .dashboard:
-            return .init(background: AppTheme.Sidebar.dashboard)
-        case .modes:
-            return .init(background: AppTheme.Sidebar.modes)
-        case .models:
-            return .init(background: AppTheme.Sidebar.models)
-        case .audio:
-            return .init(background: AppTheme.Sidebar.fallback)
-        case .dictionary:
-            return .init(background: AppTheme.Sidebar.dictionary)
-        case .history:
-            return .init(background: AppTheme.Sidebar.audio)
-        case .transcribeAudio:
-            return .init(background: AppTheme.Sidebar.transcribeAudio)
-        case .settings:
-            return .init(background: AppTheme.Sidebar.fallback)
-        case .license:
-            return .init(background: AppTheme.Sidebar.license)
-        }
+    // Dark, minimal look: icons sit on a quiet neutral tile, and only the selected page lights up in violet.
+    func sidebarIconStyle(isSelected: Bool) -> SidebarIconStyle {
+        isSelected
+            ? .init(background: AppTheme.Sidebar.selectedTile, foreground: .white)
+            : .init(background: AppTheme.Sidebar.tile, foreground: AppTheme.Sidebar.tileForeground)
     }
 }
 
@@ -141,7 +137,7 @@ private struct SidebarItemButton: View {
             HStack(spacing: 9) {
                 SidebarIconTile(
                     systemName: viewType.icon,
-                    style: viewType.sidebarIconStyle
+                    style: viewType.sidebarIconStyle(isSelected: isSelected)
                 )
 
                 Text(viewType.title)
@@ -150,7 +146,7 @@ private struct SidebarItemButton: View {
 
                 Spacer(minLength: 0)
             }
-            .foregroundStyle(isSelected ? selectedForegroundColor : Color.primary)
+            .foregroundStyle(isSelected ? Color.primary : AppTheme.Palette.textSecondary)
             .padding(.leading, 8)
             .padding(.trailing, 10)
             .frame(height: 38)
@@ -175,19 +171,11 @@ private struct SidebarItemButton: View {
     }
 
     private var rowBackgroundColor: Color {
-        if isSelected {
-            return Color(nsColor: .selectedContentBackgroundColor)
-        }
-
-        return .clear
+        isSelected ? AppTheme.Selection.fill : .clear
     }
 
     private var rowBorderColor: Color {
-        isSelected ? selectedForegroundColor.opacity(0.18) : .clear
-    }
-
-    private var selectedForegroundColor: Color {
-        Color(nsColor: .alternateSelectedControlTextColor)
+        isSelected ? AppTheme.Selection.border.opacity(0.6) : .clear
     }
 }
 
@@ -197,25 +185,13 @@ private struct SidebarIconTile: View {
 
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 6, style: .continuous)
+            RoundedRectangle(cornerRadius: 7, style: .continuous)
                 .fill(style.background)
-                .overlay(alignment: .top) {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .fill(Color.white.opacity(0.18))
-                        .frame(height: 11)
-                        .blendMode(.screen)
-                }
-                .overlay {
-                    RoundedRectangle(cornerRadius: 6, style: .continuous)
-                        .strokeBorder(Color.white.opacity(0.24), lineWidth: 0.5)
-                }
-                .shadow(color: Color.black.opacity(0.18), radius: 1.2, y: 1)
 
             Image(systemName: systemName)
-                .font(.system(size: 14.5, weight: .semibold))
+                .font(.system(size: 13, weight: .semibold))
                 .symbolRenderingMode(.monochrome)
                 .foregroundStyle(style.foreground)
-                .shadow(color: Color.black.opacity(0.16), radius: 0.5, y: 0.5)
         }
         .frame(width: 24, height: 24)
     }

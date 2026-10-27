@@ -15,6 +15,8 @@ struct MenuBarView: View {
     @ObservedObject private var launchAtLoginManager = LaunchAtLoginManager.shared
     @ObservedObject private var modeManager = ModeManager.shared
     @ObservedObject var audioDeviceManager = AudioDeviceManager.shared
+    @ObservedObject private var meetingNotes = MeetingNotesCoordinator.shared
+    @ObservedObject private var pauseController = DictationPauseController.shared
     @AppStorage(OnboardingSettings.completedV2Key) private var hasCompletedOnboardingV2 = false
 
     var body: some View {
@@ -46,6 +48,19 @@ struct MenuBarView: View {
             Button("Toggle Recorder") {
                 recorderUIManager.handleToggleRecorderPanelNotification()
             }
+            .disabled(pauseController.isPaused)
+
+            Toggle(
+                "Pause VoiceInk",
+                isOn: Binding(
+                    get: { pauseController.isPaused },
+                    set: { pauseController.setPaused($0) }
+                )
+            )
+
+            Divider()
+
+            meetingNotesMenu
 
             Divider()
 
@@ -164,6 +179,26 @@ struct MenuBarView: View {
                 NSApplication.shared.terminate(nil)
             }
         }
+    }
+
+    @ViewBuilder
+    private var meetingNotesMenu: some View {
+        switch meetingNotes.state {
+        case .idle:
+            Button("Start Meeting Notes") {
+                meetingNotes.startRecording()
+            }
+        case .starting:
+            Text("Starting Meeting Notes…")
+        case .recording:
+            Button("Stop Meeting Notes") {
+                meetingNotes.stopRecording()
+            }
+        case .processing(let phase):
+            Text(phase)
+        }
+
+        Toggle("Detect Calls Automatically", isOn: $meetingNotes.isDetectionEnabled)
     }
 
     private func showMainWindow() {

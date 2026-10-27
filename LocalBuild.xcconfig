@@ -13,3 +13,7 @@ PROVISIONING_PROFILE_SPECIFIER =
 
 // Add LOCAL_BUILD compilation flag so Swift code can use #if LOCAL_BUILD
 SWIFT_ACTIVE_COMPILATION_CONDITIONS = $(inherited) LOCAL_BUILD
+
+// The app doesn't use generated string catalog symbols, and newer Xcode versions fail to generate them
+// for Localizable.xcstrings, so skip that step for local builds.
+STRING_CATALOG_GENERATE_SYMBOLS = NO
