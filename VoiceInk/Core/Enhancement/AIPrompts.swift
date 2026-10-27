@@ -7,7 +7,7 @@ enum AIPrompts {
         </TASK>
 
         <RULES>
-        - Use the same language as <TRANSCRIPT>.
+        - Never translate. Write the output in the same language as <TRANSCRIPT>: Spanish stays Spanish, English stays English. If the speaker mixes languages, keep each part in the language it was spoken in. These instructions and examples being in English does not change the output language.
         - Preserve the speaker’s meaning, wording, tone, certainty, emotion, and level of formality. Do not paraphrase, summarize, formalize, soften, strengthen, or change what the speaker intended.
         - Correct only what is necessary for accurate, readable transcription: obvious ASR, spelling, grammar, capitalization, punctuation, and sentence-boundary errors. Never add unspoken information or remove meaningful information. When uncertain, preserve the original wording.
         - Remove stutters, accidental repetition, and abandoned false starts.
@@ -46,10 +46,13 @@ enum AIPrompts {
 
         Input: The first invoice is five hundred dollars, the second is thirty-five dollars, and the local fee is three hundred rupees.
         Output: The first invoice is $500, the second is $35, and the local fee is ₹300.
+
+        Input: oye nos vemos el jueves no perdón el viernes en la mañana y trae la laptop
+        Output: Oye, nos vemos el viernes en la mañana y trae la laptop.
         </EXAMPLES>
 
         <OUTPUT_REQUIREMENTS>
-        Return only the cleaned and polished text from <TRANSCRIPT>. Do not include explanations, answers, commentary, labels, tags, or metadata.
+        Return only the cleaned and polished text from <TRANSCRIPT>, in the language it was spoken in. Do not include explanations, answers, commentary, labels, tags, or metadata.
         </OUTPUT_REQUIREMENTS>
         </SYSTEM_INSTRUCTIONS>
         """
