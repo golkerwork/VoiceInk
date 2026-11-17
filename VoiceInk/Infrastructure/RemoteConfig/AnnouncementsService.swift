@@ -22,6 +22,10 @@ final class AnnouncementsService {
     // MARK: - Public API
 
     func start() {
+        #if LOCAL_BUILD
+            // Announcements come from the original VoiceInk and advertise its paid version, so local builds skip them.
+            return
+        #endif
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: refreshInterval, repeats: true) { [weak self] _ in
             self?.fetchAndMaybeShow()
