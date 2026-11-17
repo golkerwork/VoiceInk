@@ -29,9 +29,26 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
     @Published private(set) var checksForUpdatesWhenDashboardAppears = false
     @Published private(set) var availableUpdate: AvailableUpdate?
 
+    /// The label for every "check for updates" button.
+    static var updateButtonTitle: String {
+        #if LOCAL_BUILD
+            return String(localized: "Update My Whisper…")
+        #else
+            return String(localized: "Check for Updates…")
+        #endif
+    }
+
     override init() {
         let defaults = UserDefaults.standard
         self.defaults = defaults
+        #if LOCAL_BUILD
+            // Sparkle's feed belongs to the original VoiceInk. Installing from it would replace this build
+            // with the paid app, so local builds never start Sparkle and update with Install.command instead.
+            checksForUpdatesWhenDashboardAppears = false
+            super.init()
+            canCheckForUpdates = true
+            return
+        #endif
         checksForUpdatesWhenDashboardAppears = Self.initialAutomaticCheckPreference(in: defaults)
         super.init()
 
@@ -49,6 +66,9 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func setChecksForUpdatesWhenDashboardAppears(_ value: Bool) {
+        #if LOCAL_BUILD
+            return
+        #endif
         guard checksForUpdatesWhenDashboardAppears != value else { return }
 
         checksForUpdatesWhenDashboardAppears = value
@@ -62,6 +82,9 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func checkForUpdatesIfDue() {
+        #if LOCAL_BUILD
+            return
+        #endif
         guard checksForUpdatesWhenDashboardAppears else { return }
 
         let updater = updaterController.updater
@@ -76,6 +99,10 @@ final class UpdaterViewModel: NSObject, ObservableObject, SPUUpdaterDelegate {
     }
 
     func checkForUpdates() {
+        #if LOCAL_BUILD
+            LocalUpdater.runInstaller()
+            return
+        #endif
         guard canCheckForUpdates else { return }
 
         // Any explicit check is interaction with the currently advertised update.
@@ -156,7 +183,7 @@ struct CheckForUpdatesView: View {
     @ObservedObject var updaterViewModel: UpdaterViewModel
 
     var body: some View {
-        Button("Check for Updates…", action: updaterViewModel.checkForUpdates)
+        Button(UpdaterViewModel.updateButtonTitle, action: updaterViewModel.checkForUpdates)
             .disabled(!updaterViewModel.canCheckForUpdates)
     }
 }

@@ -71,24 +71,26 @@ if [ ! -f "$ADHOC_MARKER" ] \
     rm -f "$WWDR_CER"
 fi
 
-# Grants made for an ad-hoc build don't carry over to a signed one either.
-WAS_AD_HOC_SIGNED=false
-if codesign -dv "/Applications/VoiceInk.app" 2>&1 | grep -q "Signature=adhoc"; then
-    WAS_AD_HOC_SIGNED=true
-fi
+# macOS ties permissions to the app's signature ("designated requirement"). Remember the installed
+# app's one, so permissions are only reset when the new build's signature really differs.
+OLD_REQUIREMENT=$(codesign -dr - "/Applications/VoiceInk.app" 2>/dev/null || true)
 
 AD_HOC_SIGNED=false
 if [ -f "$ADHOC_MARKER" ] || ! security find-identity -v -p codesigning 2>/dev/null | grep -q "Apple Development"; then
     AD_HOC_SIGNED=true
-    echo ""
-    echo "Note: no Apple Development certificate found, so the app will be ad-hoc signed."
-    echo "You'll need to turn VoiceInk back on in Accessibility after each update."
-    echo "To avoid that: Xcode > Settings > Accounts > add your Apple ID > Manage Certificates > + Apple Development."
-    echo ""
 fi
 
 echo "==> Building (the first build takes several minutes)..."
 make local
+
+if [ "$AD_HOC_SIGNED" = true ]; then
+    echo "==> Signing with your local certificate so permissions survive updates..."
+    if ./scripts/local-signing.sh sign "$HOME/Downloads/VoiceInk.app" "$PWD/VoiceInk/VoiceInk.local.entitlements"; then
+        AD_HOC_SIGNED=false
+    else
+        echo "    The app stays ad-hoc signed; you'll need to turn it on again in Accessibility after this update."
+    fi
+fi
 
 echo "==> Installing to /Applications..."
 osascript -e 'quit app "VoiceInk"' >/dev/null 2>&1 || true
@@ -99,11 +101,17 @@ rm -rf "$HOME/Downloads/VoiceInk.app"
 xattr -cr "/Applications/VoiceInk.app"
 # Tell Finder and the Dock the app changed, so a new icon shows up right away.
 touch "/Applications/VoiceInk.app"
-if [ "$AD_HOC_SIGNED" = true ] || [ "$WAS_AD_HOC_SIGNED" = true ]; then
+NEW_REQUIREMENT=$(codesign -dr - "/Applications/VoiceInk.app" 2>/dev/null || true)
+PERMISSIONS_RESET=false
+if [ "$AD_HOC_SIGNED" = true ] || [ "$OLD_REQUIREMENT" != "$NEW_REQUIREMENT" ]; then
     # The old grants no longer match the new build but still look switched on. Clear them so VoiceInk asks again.
     tccutil reset Accessibility com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true
     tccutil reset ScreenCapture com.prakashjoshipax.VoiceInk >/dev/null 2>&1 || true
+    PERMISSIONS_RESET=true
 fi
+
+# "Update My Whisper…" in the app runs this installer from here.
+defaults write com.prakashjoshipax.VoiceInk MyWhisperRepoPath -string "$PWD"
 
 echo "==> Setting up free local AI for meeting notes and text cleanup..."
 setup_local_ai() {
@@ -150,8 +158,13 @@ open "/Applications/VoiceInk.app"
 
 echo ""
 echo "Done. VoiceInk is in /Applications and running in your menu bar."
-if [ "$AD_HOC_SIGNED" = true ] || [ "$WAS_AD_HOC_SIGNED" = true ]; then
+if [ "$PERMISSIONS_RESET" = true ]; then
     echo "When macOS asks, turn VoiceInk on in Accessibility, then quit and reopen VoiceInk."
+    if [ "$AD_HOC_SIGNED" = false ]; then
+        echo "This should be the last time: future updates keep the permission."
+    fi
+else
+    echo "Permissions were kept; nothing to turn on again."
 fi
 echo "Tip: set System Settings > Keyboard > 'Press globe key to' > Do Nothing, then pick Fn as the shortcut in VoiceInk."
 read -r -p "Press Return to close..."
